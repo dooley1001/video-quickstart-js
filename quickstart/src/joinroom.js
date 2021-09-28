@@ -1,5 +1,4 @@
 'use strict';
-
 const { connect, createLocalVideoTrack, Logger } = require('twilio-video');
 const { isMobile } = require('./browser');
 
@@ -32,7 +31,6 @@ function updateNetworkQualityReport(participant) {
       */
 }
 var Video = require('twilio-video');
-
 /**
  * Connect to a Room with the Network Quality API enabled.
  * This API is available only in Small Group or Group Rooms.
@@ -66,7 +64,6 @@ function setupNetworkQualityUpdatesForParticipant(participant, updateNetworkQual
     updateNetworkQualityReport(participant);
   });
 }
-
 /**
  * Listen to changes in the Network Quality reports and update your application.
  * @param {Room} room - The Room you just joined
@@ -110,8 +107,6 @@ function setNetworkQualityConfiguration(room, localVerbosity, remoteVerbosity) {
 //exports.setNetworkQualityConfiguration = setNetworkQualityConfiguration;
 
 // END OF Network Quality Example
-
-
 /**
  * Set the active Participant's video.
  * @param participant - the active Participant
@@ -202,7 +197,7 @@ function setupParticipantContainer(participant, room) {
  * @param participant - the RemoteParticipant whose VideoTrack priority is to be set
  * @param priority - null | 'low' | 'standard' | 'high'
  */
-function setVideoPriority(participant, priority) {
+function setVigit deoPriority(participant, priority) {
   participant.videoTracks.forEach(publication => {
     const track = publication.track;
     if (track && track.setPriority) {
@@ -210,7 +205,6 @@ function setVideoPriority(participant, priority) {
     }
   });
 }
-
 /**
  * Attach a Track to the DOM.
  * @param track - the Track to attach
@@ -229,7 +223,6 @@ function attachTrack(track, participant) {
     $activeVideo.css('opacity', '');
   }
 }
-
 /**
  * Detach a Track from the DOM.
  * @param track - the Track to be detached
@@ -327,7 +320,6 @@ async function joinRoom(token, connectOptions) {
       local: 3,
       remote: 3
     };
-
   // Join to the Room with the given AccessToken and ConnectOptions.
   const room = await connect(token, connectOptions);
 
@@ -365,6 +357,7 @@ async function joinRoom(token, connectOptions) {
       setCurrentActiveParticipant(room);
     }
   });
+    //Add NQ to update participant
     setupNetworkQualityUpdates(room, updateNetworkQualityReport);
 
   // Leave the Room when the "Leave Room" button is clicked.
@@ -372,7 +365,6 @@ async function joinRoom(token, connectOptions) {
     $leave.off('click', onLeave);
     room.disconnect();
   });
-
   //Screen Sharing button when clicked
   $startScreen.click(function onStartScreen() {
       const Video = require('twilio-video');
