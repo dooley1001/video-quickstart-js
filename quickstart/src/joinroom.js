@@ -1,4 +1,5 @@
 'use strict';
+
 const { connect, createLocalVideoTrack, Logger } = require('twilio-video');
 const { isMobile } = require('./browser');
 
@@ -16,21 +17,17 @@ let activeParticipant = null;
 // one of the video thumbnails.
 let isActiveParticipantPinned = false;
 
-//Network Quality Example implemented
-/**
+/************
  * Updates the Network Quality report for a Participant.
- */
+ ************/
 function updateNetworkQualityReport(participant) {
   console.log("RECEIVED updateNetworkQualityReport", participant);
   const participantDiv = document.getElementById(participant.sid);
   $(participantDiv).attr("data-identity", `NQ Level (${participant.identity}): ${participant.networkQualityLevel}`);
-   /* const title = participantDiv.querySelector('h6');
-      title.innerHTML = `NQ Level (${participant.identity}): ${participant.networkQualityLevel}`;
-      const stats = participantDiv.querySelector('textarea');
-      stats.value = `NQ Stats:\r\n========\r\n${JSON.stringify(participant.networkQualityStats, null, 2)}`;
-      */
 }
+
 var Video = require('twilio-video');
+
 /**
  * Connect to a Room with the Network Quality API enabled.
  * This API is available only in Small Group or Group Rooms.
@@ -64,6 +61,7 @@ function setupNetworkQualityUpdatesForParticipant(participant, updateNetworkQual
     updateNetworkQualityReport(participant);
   });
 }
+
 /**
  * Listen to changes in the Network Quality reports and update your application.
  * @param {Room} room - The Room you just joined
@@ -76,16 +74,15 @@ function setupNetworkQualityUpdates(room, updateNetworkQualityReport) {
   setupNetworkQualityUpdatesForParticipant(room.localParticipant, updateNetworkQualityReport);
   // Listen to changes in Network Quality levels of RemoteParticipants already
   // in the Room.
-  room.participants.forEach(function(participant) {
+  room.participants.forEach(function (participant) {
     setupNetworkQualityUpdatesForParticipant(participant, updateNetworkQualityReport);
   });
   // Listen to changes in Network Quality levels of RemoteParticipants that will
   // join the Room in the future.
-  room.on('participantConnected', function(participant) {
+  room.on('participantConnected', function (participant) {
     setupNetworkQualityUpdatesForParticipant(participant, updateNetworkQualityReport);
   });
 }
-
 /**
  * Change the local and remote Network Quality verbosity levels after joining the Room.
  * @param {Room} room - The Room you just joined
@@ -101,12 +98,10 @@ function setNetworkQualityConfiguration(room, localVerbosity, remoteVerbosity) {
     remote: remoteVerbosity
   });
 }
+    /*
+    * End of Network Quality
+    */
 
-//exports.connectToRoomWithNetworkQuality = connectToRoomWithNetworkQuality;
-//exports.setupNetworkQualityUpdates = setupNetworkQualityUpdates;
-//exports.setNetworkQualityConfiguration = setNetworkQualityConfiguration;
-
-// END OF Network Quality Example
 /**
  * Set the active Participant's video.
  * @param participant - the active Participant
@@ -124,7 +119,6 @@ function setActiveParticipant(participant) {
       $activeVideo.css('opacity', '0');
     }
   }
-
   // Set the new active Participant.
   activeParticipant = participant;
   const { identity, sid } = participant;
@@ -190,14 +184,13 @@ function setupParticipantContainer(participant, room) {
   // Add the Participant's container to the DOM.
   $participants.append($container);
 }
-
 /**
  * Set the VideoTrack priority for the given RemoteParticipant. This has no
  * effect in Peer-to-Peer Rooms.
  * @param participant - the RemoteParticipant whose VideoTrack priority is to be set
  * @param priority - null | 'low' | 'standard' | 'high'
  */
-function setVigit deoPriority(participant, priority) {
+function setVideoPriority(participant, priority) {
   participant.videoTracks.forEach(publication => {
     const track = publication.track;
     if (track && track.setPriority) {
@@ -223,6 +216,7 @@ function attachTrack(track, participant) {
     $activeVideo.css('opacity', '');
   }
 }
+
 /**
  * Detach a Track from the DOM.
  * @param track - the Track to be detached
@@ -315,12 +309,11 @@ async function joinRoom(token, connectOptions) {
   const logger = Logger.getLogger('twilio-video');
   logger.setLevel('debug');
 
-   // NQ Quality
-    connectOptions.networkQuality = {
-      local: 3,
-      remote: 3
-    };
   // Join to the Room with the given AccessToken and ConnectOptions.
+  connectOptions.networkQuality = {
+    local: 3,
+    remote: 3
+  };
   const room = await connect(token, connectOptions);
 
   // Save the LocalVideoTrack.
@@ -357,34 +350,38 @@ async function joinRoom(token, connectOptions) {
       setCurrentActiveParticipant(room);
     }
   });
-    //Add NQ to update participant
-    setupNetworkQualityUpdates(room, updateNetworkQualityReport);
+    //Update Nq with participant
+  setupNetworkQualityUpdates(room, updateNetworkQualityReport);
 
   // Leave the Room when the "Leave Room" button is clicked.
   $leave.click(function onLeave() {
     $leave.off('click', onLeave);
     room.disconnect();
   });
-  //Screen Sharing button when clicked
+
+  /********************
+      Screen Sharing
+   *******************/
+  //Start sharing screen when button is clicked (button in HTML)
   $startScreen.click(function onStartScreen() {
-      const Video = require('twilio-video');
-      function createScreenTrack(height, width) {
-        if (typeof navigator === 'undefined'
-          || !navigator.mediaDevices
-          || !navigator.mediaDevices.getDisplayMedia) {
-          return Promise.reject(new Error('getDisplayMedia is not supported'));
-        }
-        return navigator.mediaDevices.getDisplayMedia({
-          video: {
-            height: height,
-            width: width
-          }
-        }).then(function (stream) {
-          return new Video.LocalVideoTrack(stream.getVideoTracks()[0]);
-        });
+    const Video = require('twilio-video');
+    function createScreenTrack(height, width) {
+      if (typeof navigator === 'undefined'
+        || !navigator.mediaDevices
+        || !navigator.mediaDevices.getDisplayMedia) {
+        return Promise.reject(new Error('getDisplayMedia is not supported'));
       }
-      createScreenTrack(1366, 768).then((screen) => room.localParticipant.publishTrack(screen));
-    });
+      return navigator.mediaDevices.getDisplayMedia({
+        video: {
+          height: height,
+          width: width
+        }
+      }).then(function (stream) {
+        return new Video.LocalVideoTrack(stream.getVideoTracks()[0]);
+      });
+    }
+    createScreenTrack(1366, 768).then((screen) => room.localParticipant.publishTrack(screen));
+  });
 
   return new Promise((resolve, reject) => {
     // Leave the Room when the "beforeunload" event is fired.
